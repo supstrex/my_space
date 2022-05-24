@@ -14,8 +14,12 @@ export class UsersService {
   async createUser(firstname: string, lastname: string, email: string, password: string){
         const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = new this.userModel({ firstname, lastname, email, password : hashedPassword });
-        const result = await newUser.save();
-        return result.id as string;
+        try {
+          const result = await newUser.save();
+          return result.id as string;
+        } catch (error) {
+          throw new Error(error);
+        } 
   }
 
   async getUsers(){
@@ -38,10 +42,8 @@ export class UsersService {
     const deleted = await this.userModel.deleteOne({id});
     return deleted;
   }
-  async updateOne(id : string, userUp : User): Promise<User>{
+  async update(id : string, userUp : User): Promise<User>{
     const updated = await this.userModel.findByIdAndUpdate(id,userUp,{new: true});
-    console.log(updated);
-    
     return updated;
   }
 }

@@ -13,8 +13,12 @@ export class UsersController {
         @Body('email') email: string,
         @Body('password') password: string
     ){
-       const generatedId = await this.usersService.createUser(firstname, lastname, email, password)
-       return {id: generatedId};
+        try {
+            const generatedId = await this.usersService.createUser(firstname, lastname, email, password);
+            return {id: generatedId};
+        } catch (error) {
+            return new Error("Please enter another email")
+        }
     }
     @Get()
     async getAllUsers(){
@@ -32,6 +36,6 @@ export class UsersController {
     }
     @Put(":id")
     async update(@Param('id') userId: string, @Body() userUp: User){
-        return this.usersService.updateOne(userId,userUp);
+        return this.usersService.update(userId,userUp);
     }
 }
