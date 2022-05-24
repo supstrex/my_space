@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Body, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User } from './users.model';
@@ -11,9 +11,9 @@ import * as bcrypt from 'bcrypt';
 export class UsersService {
   constructor(@InjectModel("User") private readonly userModel : Model<User>){}
 
-  async createUser(email: string, password: string){
+  async createUser(firstname: string, lastname: string, email: string, password: string){
         const hashedPassword = await bcrypt.hash(password, 10);
-        const newUser = new this.userModel({ email, password : hashedPassword });
+        const newUser = new this.userModel({ firstname, lastname, email, password : hashedPassword });
         const result = await newUser.save();
         return result.id as string;
   }
@@ -30,30 +30,18 @@ export class UsersService {
     }
     return user;
   }
-    //Some hard coded users
-  // private readonly users = [
-  //   {
-  //     userId: 1,
-  //     email: 'arthur@gmail.com',
-  //     password: 'arthur',
-  //   },
-  //   {
-  //     userId: 2,
-  //     email: 'arno@gmail.com',
-  //     password: 'arno',
-  //   },
-  //   {
-  //       userId: 3,
-  //       email: 'rob@gmail.com',
-  //       password: 'rob',
-  //     },
-  // ];
-
-  // async findOne(email: string): Promise<User | undefined> {
-  //   return this.users.find(user => user.email === email);
-  // }
   async findUser(email: string): Promise<User> {
     const user = await this.userModel.findOne({email}).exec();
     return user;
+  }
+  async remove(id : string){
+    const deleted = await this.userModel.deleteOne({id});
+    return deleted;
+  }
+  async updateOne(id : string, userUp : User): Promise<User>{
+    const updated = await this.userModel.findByIdAndUpdate(id,userUp,{new: true});
+    console.log(updated);
+    
+    return updated;
   }
 }
