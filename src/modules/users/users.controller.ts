@@ -2,6 +2,7 @@ import { Controller, Request, Post, UseGuards, Get, Body, Param, Delete, Put } f
 import { AuthGuard } from '@nestjs/passport';
 import { UsersService } from './users.service'; 
 import { User } from './users.model';
+import { CreateUserDto } from './users.dto.ts/usercreate.dto';
 
 @Controller("users")
 export class UsersController {
@@ -11,13 +12,16 @@ export class UsersController {
         @Body('firstname') firstname: string,
         @Body('lastname') lastname: string,
         @Body('email') email: string,
-        @Body('password') password: string
+        @Body('password') password: string,
+        @Body('passwordConfirm') passwordConfirm: string,
+        @Body() CreateUserDto: CreateUserDto
     ){
+        // !! Error handling is not complete
         try {
-            const generatedId = await this.usersService.createUser(firstname, lastname, email, password);
+            const generatedId = await this.usersService.createUser(firstname, lastname, email, password, passwordConfirm);
             return {id: generatedId};
         } catch (error) {
-            return new Error("Please enter another email")
+            throw new Error(error);
         }
     }
     @Get()
