@@ -1,4 +1,4 @@
-import { Body, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User } from './users.model';
@@ -6,22 +6,20 @@ import * as bcrypt from 'bcrypt';
 
 // Here we have to fetch data from DB
 //export type User = any;
-
 @Injectable()
 export class UsersService {
   constructor(@InjectModel("User") private readonly userModel : Model<User>){}
-
-  async createUser(firstname: string, lastname: string, email: string, password: string){
-        const hashedPassword = await bcrypt.hash(password, 10);
+ 
+  async createUser(firstname: string, lastname: string, email: string, password: string, passwordConfirm: string){
+    const hashedPassword = await bcrypt.hash(password, 10);
+      if(password === passwordConfirm){
         const newUser = new this.userModel({ firstname, lastname, email, password : hashedPassword });
-        try {
-          const result = await newUser.save();
-          return result.id as string;
-        } catch (error) {
-          throw new Error(error);
-        } 
+        const result = await newUser.save();
+        return result.id as string;
+      }else{// !! Error handling is not complete
+        throw new Error('is not equal password');
+      }
   }
-
   async getUsers(){
     const users = await this.userModel.find().exec();
     return users as User[];
